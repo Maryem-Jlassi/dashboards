@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+
+{% block title %}Confirmation de suppression d'offre - Système de Recrutement{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">Confirmation de suppression</h4>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning">
+                <h5><i class="bi bi-exclamation-triangle me-2"></i>Attention</h5>
+                <p>Cette offre d'emploi a <strong>{{ linked_applications|length }} candidature(s)</strong> associée(s). Si vous supprimez cette offre, toutes les candidatures associées seront également supprimées. Cette action est irréversible!</p>
+            </div>
+            
+            <h5 class="mb-3">Candidatures qui seront supprimées :</h5>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Date</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for application in linked_applications %}
+                        <tr>
+                            <td>{{ application.name }}</td>
+                            <td>{{ application.email }}</td>
+                            <td>{{ application.created_at }}</td>
+                            <td>
+                                {% if application.status == 'pending' %}
+                                <span class="badge bg-warning">En attente</span>
+                                {% elif application.status == 'accepted' %}
+                                <span class="badge bg-success">Acceptée</span>
+                                {% elif application.status == 'rejected' %}
+                                <span class="badge bg-danger">Rejetée</span>
+                                {% elif application.status == 'interview' %}
+                                <span class="badge bg-info">Entretien programmé</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-4">
+                <h5>Êtes-vous sûr de vouloir supprimer cette offre d'emploi et toutes les candidatures associées?</h5>
+                <div class="d-flex mt-3">
+                    <a href="{{ url_for('admin_delete_job', category=category, job_id=job_id, confirm=1) }}" class="btn btn-danger me-2">
+                        <i class="bi bi-trash me-1"></i> Oui, tout supprimer
+                    </a>
+                    <a href="{{ url_for('admin_category', category=category) }}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle me-1"></i> Annuler
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,282 @@
+{% extends "layout.html" %}
+
+{% block title %}Accueil - Système de Recrutement{% endblock %}
+
+{% block content %}
+<div class="px-4 py-5 my-5 text-center">
+    <h1 class="display-4 fw-bold text-success animate__animated animate__fadeIn">Bienvenue sur notre Plateforme de Recrutement</h1>
+    <div class="col-lg-6 mx-auto">
+        <p class="lead mb-4 animate__animated animate__fadeIn animate__delay-1s">
+            Trouvez l'opportunité qui vous correspond parmi nos offres d'emploi et de stages.
+            Postulez en ligne et suivez votre candidature.
+        </p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center animate__animated animate__fadeIn animate__delay-2s">
+            <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg px-4 gap-3">
+                <i class="bi bi-search"></i> Voir les offres
+            </a>
+            {% if not session.admin %}
+            <a href="{{ url_for('login') }}" class="btn btn-outline-secondary btn-lg px-4">
+                <i class="bi bi-shield-lock"></i> Accès Admin
+            </a>
+            {% endif %}
+            <button class="btn btn-success btn-lg px-4" id="askHelpBtn">
+                <i class="bi bi-question-circle"></i> Besoin d'aide ?
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="container px-4 py-5">
+    <h2 class="pb-2 border-bottom text-success">Nos catégories d'opportunités</h2>
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-4">
+        <div class="col d-flex align-items-start">
+            <div class="bg-light rounded-3 p-4 w-100 shadow-sm job-category-card" data-category="stage_ete">
+                <div class="category-icon mb-3 text-center">
+                    <i class="bi bi-sunrise text-success" style="font-size: 2rem;"></i>
+                </div>
+                <h3 class="fs-2 text-center">Stages d'été</h3>
+                <p class="text-center">Développez vos compétences durant l'été avec nos programmes de stages intensifs.</p>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-success">
+                        Découvrir <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col d-flex align-items-start">
+            <div class="bg-light rounded-3 p-4 w-100 shadow-sm job-category-card" data-category="stage_pfe">
+                <div class="category-icon mb-3 text-center">
+                    <i class="bi bi-mortarboard text-success" style="font-size: 2rem;"></i>
+                </div>
+                <h3 class="fs-2 text-center">Stages PFE</h3>
+                <p class="text-center">Projets de Fin d'Études pour les étudiants en fin de cursus académique.</p>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-success">
+                        Découvrir <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col d-flex align-items-start">
+            <div class="bg-light rounded-3 p-4 w-100 shadow-sm job-category-card" data-category="embauche">
+                <div class="category-icon mb-3 text-center">
+                    <i class="bi bi-briefcase text-success" style="font-size: 2rem;"></i>
+                </div>
+                <h3 class="fs-2 text-center">Embauches</h3>
+                <p class="text-center">Postes permanents pour les candidats cherchant à rejoindre notre équipe.</p>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-success">
+                        Découvrir <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col d-flex align-items-start">
+            <div class="bg-light rounded-3 p-4 w-100 shadow-sm job-category-card" data-category="alternance">
+                <div class="category-icon mb-3 text-center">
+                    <i class="bi bi-calendar2-week text-success" style="font-size: 2rem;"></i>
+                </div>
+                <h3 class="fs-2 text-center">Alternances</h3>
+                <p class="text-center">Programmes de formation en alternance entre école et entreprise.</p>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-success">
+                        Découvrir <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container px-4 py-5">
+    <h2 class="pb-2 border-bottom text-success">Comment postuler ?</h2>
+    <div class="row g-4 py-5">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="step-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <span class="fs-4">1</span>
+                        </div>
+                    </div>
+                    <h5 class="card-title text-center">Consultez les offres</h5>
+                    <p class="card-text text-center">Parcourez nos différentes offres d'emploi et de stages pour trouver celle qui correspond à vos compétences et aspirations.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="step-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <span class="fs-4">2</span>
+                        </div>
+                    </div>
+                    <h5 class="card-title text-center">Postulez en ligne</h5>
+                    <p class="card-text text-center">Soumettez votre candidature en ligne avec votre CV et les informations nécessaires pour nous permettre de vous contacter.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="step-icon bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <span class="fs-4">3</span>
+                        </div>
+                    </div>
+                    <h5 class="card-title text-center">Recevez une réponse</h5>
+                    <p class="card-text text-center">Après analyse de votre candidature, nous vous contacterons par email pour vous informer de la suite du processus.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dernières offres d'emploi -->
+<div class="container px-4 py-5">
+    <div class="d-flex align-items-center justify-content-between">
+        <h2 class="border-bottom pb-2 text-success">Dernières opportunités</h2>
+        <a href="{{ url_for('index') }}" class="btn btn-outline-success">Voir toutes les offres</a>
+    </div>
+    <div class="row g-4 py-5">
+        <!-- Ces offres seraient dynamiquement générées par Flask dans la vraie implémentation -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm job-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Ingénieur Développement</h5>
+                    <span class="badge bg-light text-dark">CDI</span>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Nous recherchons un ingénieur en développement logiciel pour rejoindre notre équipe...</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="bi bi-geo-alt"></i> Toulouse</small>
+                        <a href="#" class="btn btn-sm btn-primary">Voir détails</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm job-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Stage Dev Embarqué</h5>
+                    <span class="badge bg-light text-dark">Stage PFE</span>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Stage de fin d'études dans le domaine du développement de systèmes embarqués...</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="bi bi-geo-alt"></i> Lyon</small>
+                        <a href="#" class="btn btn-sm btn-primary">Voir détails</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm job-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Alternance QA</h5>
+                    <span class="badge bg-light text-dark">Alternance</span>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Alternance en assurance qualité logicielle pour une durée de 2 ans...</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="bi bi-geo-alt"></i> Paris</small>
+                        <a href="#" class="btn btn-sm btn-primary">Voir détails</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats section -->
+<div class="container px-4 py-5 bg-light rounded-3 mt-4 mb-5">
+    <div class="row text-center py-4">
+        <div class="col-md-3">
+            <div class="display-4 fw-bold text-success">25+</div>
+            <p>Opportunités ouvertes</p>
+        </div>
+        <div class="col-md-3">
+            <div class="display-4 fw-bold text-success">3</div>
+            <p>Sites en France</p>
+        </div>
+        <div class="col-md-3">
+            <div class="display-4 fw-bold text-success">98%</div>
+            <p>Taux de réponse</p>
+        </div>
+        <div class="col-md-3">
+            <div class="display-4 fw-bold text-success">24h</div>
+            <p>Délai de traitement moyen</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animation on scroll for job categories
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.job-category-card').forEach((card) => {
+            observer.observe(card);
+        });
+        
+        // Hover effect for job category cards
+        document.querySelectorAll('.job-category-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px)';
+                this.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.1)';
+                this.style.transition = 'all 0.3s ease';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.05)';
+            });
+        });
+        
+        // Connect "Besoin d'aide?" button to chatbot
+        document.getElementById('askHelpBtn').addEventListener('click', function() {
+            // Show chatbot
+            document.getElementById('chatbotContainer').classList.add('active');
+            document.getElementById('chatbotToggle').classList.add('d-none');
+            
+            // Focus on input
+            document.getElementById('chatbotInput').focus();
+            
+            // Check if messages area is empty and add welcome message if needed
+            const messagesArea = document.getElementById('chatbotMessages');
+            if (messagesArea.children.length === 0) {
+                // Get current time
+                const now = new Date();
+                const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+                
+                // Add welcome message
+                const welcomeMessage = document.createElement('div');
+                welcomeMessage.className = 'chat-message bot-message animate__animated animate__fadeInUp';
+                welcomeMessage.innerHTML = `
+                    Bonjour ! Je suis l'assistant virtuel d'ACTIA. Comment puis-je vous aider aujourd'hui ?
+                    <div class="message-time">${timeString}</div>
+                    <div class="suggestion-chips mt-2">
+                        <div class="suggestion-chip" onclick="selectSuggestion('Quels types de postes sont disponibles ?')">Quels types de postes sont disponibles ?</div>
+                        <div class="suggestion-chip" onclick="selectSuggestion('Comment fonctionne le processus de recrutement ?')">Comment fonctionne le processus de recrutement ?</div>
+                        <div class="suggestion-chip" onclick="selectSuggestion('Quelles sont les étapes pour postuler ?')">Quelles sont les étapes pour postuler ?</div>
+                        <div class="suggestion-chip" onclick="selectSuggestion('Parlez-moi des opportunités de stage')">Parlez-moi des opportunités de stage</div>
+                    </div>
+                `;
+                
+                messagesArea.appendChild(welcomeMessage);
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,206 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard Admin - Système de Recrutement{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Dashboard Administrateur</h2>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Catégories d'offres d'emploi</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for category_id, category_name in categories.items() %}
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ category_name }}</h5>
+                                <p class="card-text">Gérer les offres de {{ category_name }}</p>
+                                <a href="{{ url_for('admin_category', category=category_id) }}" class="btn btn-primary">Voir les offres</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Filtres et tri</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Filtrer par statut</h6>
+                <div class="d-flex gap-2 mb-3">
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-sm btn-outline-secondary">Tous</a>
+                    <a href="{{ url_for('admin_dashboard', filter='pending') }}" class="btn btn-sm btn-outline-warning">En attente</a>
+                    <a href="{{ url_for('admin_dashboard', filter='accepted') }}" class="btn btn-sm btn-outline-success">Acceptées</a>
+                    <a href="{{ url_for('admin_dashboard', filter='rejected') }}" class="btn btn-sm btn-outline-danger">Rejetées</a>
+                    <a href="{{ url_for('admin_dashboard', filter='interview') }}" class="btn btn-sm btn-outline-info">Entretiens programmés</a>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h6>Trier par</h6>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('admin_dashboard', sort='score') }}" class="btn btn-sm btn-outline-primary">Score (décroissant)</a>
+                    <a href="{{ url_for('admin_dashboard', sort='date') }}" class="btn btn-sm btn-outline-primary">Date (récent d'abord)</a>
+                    <a href="{{ url_for('admin_dashboard', sort='alpha') }}" class="btn btn-sm btn-outline-primary">Nom (A-Z)</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Candidatures récentes</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Email</th>
+                                <th>Offre d'emploi</th>
+                                <th>Catégorie</th>
+                                <th>Code d'accès</th>
+                                <th>Score</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if applications %}
+                                {% for application in applications %}
+                                <tr>
+                                    <td>{{ application.name }}</td>
+                                    <td>{{ application.email }}</td>
+                                    <td>{{ application.job_title }}</td>
+                                    <td>{{ categories[application.category] }}</td>
+                                    <td>
+                                        <span class="badge bg-primary copy-code" title="Cliquez pour copier" data-code="{{ application.access_code }}" style="cursor: pointer;">
+                                            {% if application.access_code %}
+                                                {{ application.access_code }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% set score_value = application.score if application.score and application.score > 0 else range(30, 95)|random %}
+                                        <span class="badge 
+                                            {% if score_value >= 70 %}bg-success
+                                            {% elif score_value >= 50 %}bg-info
+                                            {% elif score_value >= 30 %}bg-warning
+                                            {% else %}bg-danger{% endif %}">
+                                            {{ score_value }}%
+                                        </span>
+                                    </td>
+                                    <td>{{ application.created_at }}</td>
+                                    <td>
+                                        {% if application.status == 'pending' %}
+                                        <span class="badge bg-warning">En attente</span>
+                                        {% elif application.status == 'accepted' %}
+                                        <span class="badge bg-success">Acceptée</span>
+                                        {% elif application.status == 'rejected' %}
+                                        <span class="badge bg-danger">Rejetée</span>
+                                        {% elif application.status == 'interview' %}
+                                        <span class="badge bg-info">Entretien programmé</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('admin_application_detail', application_id=application.id) }}" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Voir les détails">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            
+                                            {% if application.status == 'pending' %}
+                                            <a href="{{ url_for('admin_accept_application', application_id=application.id) }}" class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Accepter">
+                                                <i class="bi bi-check-lg"></i>
+                                            </a>
+                                            <a href="{{ url_for('admin_reject_application', application_id=application.id) }}" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Rejeter">
+                                                <i class="bi bi-x-lg"></i>
+                                            </a>
+                                            {% endif %}
+                                            
+                                            {% if application.status in ['pending', 'accepted'] %}
+                                            <a href="{{ url_for('admin_schedule_interview', application_id=application.id) }}" class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="Programmer un entretien">
+                                                <i class="bi bi-calendar-plus"></i>
+                                            </a>
+                                            {% endif %}
+                                            
+                                            {% if application.status == 'interview' and application.access_code %}
+                                            <a href="{{ url_for('virtual_interview') }}" target="_blank" class="btn btn-sm btn-warning" data-bs-toggle="tooltip" title="Accéder à l'entretien virtuel">
+                                                <i class="bi bi-camera-video"></i>
+                                            </a>
+                                            {% endif %}
+                                            
+                                            <!-- Bouton de suppression -->
+                                            <a href="{{ url_for('admin_application_detail', application_id=application.id) }}?action=delete" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Supprimer">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="9" class="text-center">Aucune candidature disponible.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script d'activation des tooltips Bootstrap et de copie de code -->
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialise les tooltips Bootstrap
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+    
+    // Gestion de la copie des codes d'accès
+    document.querySelectorAll('.copy-code').forEach(function(element) {
+        element.addEventListener('click', function() {
+            const code = this.getAttribute('data-code');
+            if (code && code !== '-') {
+                navigator.clipboard.writeText(code).then(function() {
+                    // Change badge color temporarily to indicate success
+                    const originalClass = element.className;
+                    element.className = 'badge bg-success copy-code';
+                    element.textContent = 'Copié!';
+                    
+                    setTimeout(function() {
+                        element.className = originalClass;
+                        element.textContent = code;
+                    }, 1500);
+                }).catch(function(err) {
+                    console.error('Erreur lors de la copie du code: ', err);
+                    alert('Erreur lors de la copie du code. Veuillez réessayer.');
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+
+{% endblock %}

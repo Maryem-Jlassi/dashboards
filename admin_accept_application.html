@@ -1,0 +1,306 @@
+{% extends "layout.html" %}
+
+{% block title %}Accepter Candidature - {{ application.name }} - Système de Recrutement{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('admin_application_detail', application_id=application.id) }}">Candidature de {{ application.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Accepter candidature</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Informations du candidat</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Nom</span>
+                        <span class="fw-bold">{{ application.name }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Email</span>
+                        <span class="fw-bold">{{ application.email }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Poste</span>
+                        <span class="fw-bold">{{ application.job_title }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Statut actuel</span>
+                        {% if application.status == 'pending' %}
+                        <span class="badge bg-warning">En attente</span>
+                        {% elif application.status == 'accepted' %}
+                        <span class="badge bg-success">Acceptée</span>
+                        {% elif application.status == 'rejected' %}
+                        <span class="badge bg-danger">Rejetée</span>
+                        {% elif application.status == 'interview' %}
+                        <span class="badge bg-info">Entretien programmé</span>
+                        {% endif %}
+                    </li>
+                    {% if application.score %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Score</span>
+                        <span class="fw-bold badge 
+                            {% if application.score >= 70 %}bg-success
+                            {% elif application.score >= 50 %}bg-info
+                            {% elif application.score >= 30 %}bg-warning
+                            {% else %}bg-danger{% endif %}">
+                            {{ application.score }}%
+                        </span>
+                    </li>
+                    {% endif %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Code d'accès</span>
+                        <span class="fw-bold badge bg-primary" id="displayed-access-code">
+                            {% if application.access_code %}
+                                {{ application.access_code }}
+                            {% else %}
+                                Généré automatiquement
+                            {% endif %}
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Accepter la candidature et programmer un entretien</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        En acceptant cette candidature, deux emails seront envoyés à <strong>{{ application.email }}</strong>:
+                        <ol class="mb-0">
+                            <li>Un email d'acceptation de sa candidature</li>
+                            <li>Un email d'invitation à un entretien avec le lien Google Meet et la date</li>
+                        </ol>
+                    </div>
+                    
+                    <h5 class="mt-4 mb-3 border-bottom pb-2">1. Email d'acceptation de la candidature</h5>
+                    
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="use_template_acceptance" checked>
+                            <label class="form-check-label" for="use_template_acceptance">Utiliser le modèle d'acceptation par défaut</label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="acceptance_message" class="form-label">Contenu de l'email d'acceptation</label>
+                        <textarea class="form-control" id="acceptance_message" name="acceptance_message" rows="8"></textarea>
+                        <div class="form-text">
+                            Laissez vide pour utiliser le modèle par défaut. Vous pouvez personnaliser le message d'acceptation.
+                        </div>
+                    </div>
+                    
+                    <h5 class="mt-5 mb-3 border-bottom pb-2">2. Email de programmation d'entretien</h5>
+                    
+                    <div class="mb-4">
+                        <label for="interview_date" class="form-label">Date et heure de l'entretien *</label>
+                        <input type="datetime-local" class="form-control" id="interview_date" name="interview_date" required>
+                        <div class="form-text">Spécifiez la date et l'heure de l'entretien (format: YYYY-MM-DD HH:MM).</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="google_meet_link" class="form-label">Lien Google Meet *</label>
+                        <input type="url" class="form-control" id="google_meet_link" name="google_meet_link" placeholder="https://meet.google.com/abc-defg-hij" required>
+                        <div class="form-text">Entrez le lien Google Meet pour l'entretien en visioconférence.</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="access_code" class="form-label">Code d'accès pour l'entretien virtuel</label>
+                        <input type="text" class="form-control" id="access_code" name="access_code" placeholder="Laissez vide pour générer automatiquement">
+                        <div class="form-text">
+                            Ce code permettra au candidat d'accéder à l'entretien virtuel. Un code sera généré automatiquement si vous laissez ce champ vide.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="use_template_interview" checked>
+                            <label class="form-check-label" for="use_template_interview">Utiliser le modèle d'entretien par défaut</label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="interview_message" class="form-label">Contenu de l'email d'entretien</label>
+                        <textarea class="form-control" id="interview_message" name="interview_message" rows="8"></textarea>
+                        <div class="form-text">
+                            Laissez vide pour utiliser le modèle par défaut. Vous pouvez personnaliser le message d'invitation à l'entretien.
+                            Le code d'accès sera automatiquement inclus dans l'email.
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">Accepter et envoyer les emails</button>
+                        <a href="{{ url_for('admin_application_detail', application_id=application.id) }}" class="btn btn-outline-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Définir la date et l'heure actuelles + 3 jours comme valeur par défaut
+    const now = new Date();
+    now.setDate(now.getDate() + 3);
+    now.setHours(10, 0, 0, 0); // 10:00 AM
+    
+    // Formater la date pour l'input datetime-local (YYYY-MM-DDThh:mm)
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    const defaultDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+    document.getElementById('interview_date').value = defaultDateTime;
+    
+    // Générer un exemple de lien Google Meet
+    document.getElementById('google_meet_link').value = 'https://meet.google.com/abc-defg-hij';
+    
+    // Générer un code d'accès aléatoire
+    function generateRandomCode() {
+        return Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+    
+    // Générer un code d'accès aléatoire par défaut
+    const accessCodeInput = document.getElementById('access_code');
+    const randomCode = generateRandomCode();
+    accessCodeInput.placeholder = randomCode;
+    
+    // Si aucun code n'est déjà défini, pré-remplir avec le code généré
+    {% if not application.access_code %}
+        accessCodeInput.value = randomCode;
+        document.getElementById('displayed-access-code').textContent = randomCode;
+    {% endif %}
+    
+    // Mettre à jour le code affiché lorsqu'il change
+    accessCodeInput.addEventListener('input', function() {
+        const displayedCode = document.getElementById('displayed-access-code');
+        displayedCode.textContent = this.value || "Généré automatiquement";
+    });
+    
+    // Gérer les templates d'email
+    const useTemplateAcceptanceCheckbox = document.getElementById('use_template_acceptance');
+    const acceptanceMessageTextarea = document.getElementById('acceptance_message');
+    const useTemplateInterviewCheckbox = document.getElementById('use_template_interview');
+    const interviewMessageTextarea = document.getElementById('interview_message');
+    const interviewDateInput = document.getElementById('interview_date');
+    const googleMeetLinkInput = document.getElementById('google_meet_link');
+    
+    function generateAcceptanceTemplate() {
+        if (!useTemplateAcceptanceCheckbox.checked) {
+            acceptanceMessageTextarea.value = '';
+            return;
+        }
+        
+        const candidateName = "{{ application.name }}";
+        const jobTitle = "{{ application.job_title }}";
+        
+        const template = `Objet: Candidature retenue pour ${jobTitle}
+
+Bonjour ${candidateName},
+
+Nous avons le plaisir de vous informer que votre candidature pour le poste de ${jobTitle} a retenu notre attention.
+
+Votre profil correspond particulièrement bien à nos attentes.
+
+Nous vous invitons à consulter notre prochain email qui contient tous les détails concernant l'entretien que nous souhaitons programmer avec vous.
+
+Dans l'attente de cet échange, nous vous prions d'agréer nos salutations distinguées.
+
+L'équipe de recrutement`;
+        
+        acceptanceMessageTextarea.value = template;
+    }
+    
+    function generateInterviewTemplate() {
+        if (!useTemplateInterviewCheckbox.checked) {
+            interviewMessageTextarea.value = '';
+            return;
+        }
+        
+        const candidateName = "{{ application.name }}";
+        const jobTitle = "{{ application.job_title }}";
+        const interviewDateObj = new Date(interviewDateInput.value);
+        const meetLink = googleMeetLinkInput.value;
+        const accessCode = accessCodeInput.value || randomCode;
+        
+        // Formater la date en français
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        let formattedDate = '';
+        
+        try {
+            formattedDate = interviewDateObj.toLocaleDateString('fr-FR', options);
+        } catch (e) {
+            // Fallback si toLocaleDateString ne fonctionne pas comme prévu
+            const months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+            const days = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+            
+            formattedDate = `${days[interviewDateObj.getDay()]} ${interviewDateObj.getDate()} ${months[interviewDateObj.getMonth()]} ${interviewDateObj.getFullYear()} à ${String(interviewDateObj.getHours()).padStart(2, '0')}:${String(interviewDateObj.getMinutes()).padStart(2, '0')}`;
+        }
+        
+        const template = `Objet: Invitation à un entretien pour ${jobTitle}
+
+Bonjour ${candidateName},
+
+Suite à notre précédent email concernant votre candidature pour le poste de ${jobTitle},
+nous avons le plaisir de vous inviter à un entretien qui se déroulera le ${formattedDate}.
+
+L'entretien aura lieu en visioconférence via Google Meet. Voici le lien pour rejoindre la réunion :
+${meetLink}
+
+Pour accéder à notre plateforme d'entretien virtuel, veuillez utiliser le code d'accès unique suivant :
+CODE D'ACCÈS : ${accessCode}
+
+URL de l'entretien virtuel : ${window.location.origin}/virtual_interview
+
+L'entretien durera environ 45 minutes et se déroulera comme suit :
+- Présentation de l'entreprise et du poste (10 minutes)
+- Discussion sur votre parcours et vos compétences (20 minutes)
+- Questions-réponses (15 minutes)
+
+Veuillez confirmer votre disponibilité pour cet entretien en répondant à cet e-mail.
+
+Si cette date ou cet horaire ne vous convient pas, merci de nous le faire savoir rapidement
+afin que nous puissions trouver un autre créneau.
+
+Nous nous réjouissons de vous rencontrer et d'en apprendre davantage sur votre profil.
+
+Cordialement,
+L'équipe de recrutement`;
+        
+        interviewMessageTextarea.value = template;
+    }
+    
+    // Générer les templates par défaut au chargement
+    generateAcceptanceTemplate();
+    generateInterviewTemplate();
+    
+    // Mettre à jour les templates lorsque les champs changent
+    useTemplateAcceptanceCheckbox.addEventListener('change', generateAcceptanceTemplate);
+    useTemplateInterviewCheckbox.addEventListener('change', generateInterviewTemplate);
+    interviewDateInput.addEventListener('change', generateInterviewTemplate);
+    googleMeetLinkInput.addEventListener('input', generateInterviewTemplate);
+    accessCodeInput.addEventListener('input', generateInterviewTemplate);
+});
+</script>
+{% endblock %}
+
+{% endblock %}

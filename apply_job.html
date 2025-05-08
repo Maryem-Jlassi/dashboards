@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+
+{% block title %}Postuler - {{ job.title }} - Système de Recrutement{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('public_jobs') }}">Offres d'emploi</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('public_job_detail', category=category, job_id=job_id) }}">{{ job.title }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Postuler</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="alert alert-info">
+    <strong>Information:</strong> Vous ne pouvez postuler qu'une seule fois à cette offre avec la même adresse email.
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Formulaire de candidature - {{ job.title }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nom complet *</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email *</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                        <div class="form-text">Nous utiliserons cette adresse pour vous contacter. Vous ne pourrez pas soumettre plusieurs candidatures avec le même email pour cette offre.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cv_file" class="form-label">CV (PDF uniquement) *</label>
+                        <input type="file" class="form-control" id="cv_file" name="cv_file" accept=".pdf" required>
+                        <div class="form-text">Taille maximale: 5 MB.</div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Soumettre ma candidature</button>
+                        <a href="{{ url_for('public_job_detail', category=category, job_id=job_id) }}" class="btn btn-outline-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Informations sur l'offre</h5>
+            </div>
+            <div class="card-body">
+                <h5>{{ job.title }}</h5>
+                <p><span class="badge bg-info">{{ category_name }}</span></p>
+                <div class="mb-3">
+                    {{ job.description[:250] }}{% if job.description|length > 250 %}...{% endif %}
+                </div>
+                <p><small class="text-muted">Publié le {{ job.created_at }}</small></p>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Processus de recrutement</h5>
+            </div>
+            <div class="card-body">
+                <ol>
+                    <li><strong>Candidature</strong>: Soumission du CV et des informations de contact.</li>
+                    <li><strong>Analyse</strong>: Analyse de votre candidature par notre système et équipe.</li>
+                    <li><strong>Réponse</strong>: Vous recevrez une réponse par email.</li>
+                    <li><strong>Entretien</strong>: Si votre candidature est retenue, vous serez invité à un entretien.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

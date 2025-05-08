@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block title %}Modifier Offre - {{ category_name }} - Système de Recrutement{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Modifier l'offre - {{ category_name }}</h2>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            <div class="mb-3">
+                <label for="job_title" class="form-label">Titre de l'offre</label>
+                <input type="text" class="form-control" id="job_title" name="job_title" value="{{ job.title }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="job_description" class="form-label">Description de l'offre</label>
+                <textarea class="form-control" id="job_description" name="job_description" rows="10" required>{{ job.description }}</textarea>
+                <small class="form-text text-muted">
+                    Incluez les détails comme les compétences requises, l'expérience, la formation, etc.
+                    Plus la description est détaillée, meilleure sera la correspondance avec les CV.
+                </small>
+            </div>
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('admin_category', category=category) }}" class="btn btn-secondary">Annuler</a>
+                <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

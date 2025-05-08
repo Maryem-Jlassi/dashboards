@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+
+{% block title %}Gestion {{ category_name }} - Système de Recrutement{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Gestion des offres - {{ category_name }}</h2>
+    <a href="{{ url_for('admin_new_job', category=category) }}" class="btn btn-success">Ajouter une offre</a>
+</div>
+
+<div class="row">
+    {% if job_offers %}
+        {% for job in job_offers %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 job-card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ job.title }}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ job.description[:150] }}{% if job.description|length > 150 %}...{% endif %}</p>
+                    <p class="card-text"><small class="text-muted">Créé le {{ job.created_at }}</small></p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0">
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin_edit_job', category=category, job_id=job.id) }}" class="btn btn-primary btn-sm">Modifier</a>
+                        <a href="{{ url_for('admin_delete_job', category=category, job_id=job.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette offre ?');">Supprimer</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                Aucune offre d'emploi dans cette catégorie.
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<div class="mt-4">
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Retour au Dashboard</a>
+</div>
+{% endblock %}

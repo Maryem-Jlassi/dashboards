@@ -1,0 +1,435 @@
+{% extends "layout.html" %}
+
+{% block title %}Détails Candidature - {{ application.name }} - Système de Recrutement{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Candidature de {{ application.name }}</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Informations de base</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Nom</span>
+                        <span class="fw-bold">{{ application.name }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Email</span>
+                        <span class="fw-bold">{{ application.email }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Poste</span>
+                        <span class="fw-bold">{{ application.job_title }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Date de candidature</span>
+                        <span class="fw-bold">{{ application.created_at }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Statut</span>
+                        {% if application.status == 'pending' %}
+                        <span class="badge bg-warning">En attente</span>
+                        {% elif application.status == 'accepted' %}
+                        <span class="badge bg-success">Acceptée</span>
+                        {% elif application.status == 'rejected' %}
+                        <span class="badge bg-danger">Rejetée</span>
+                        {% elif application.status == 'interview' %}
+                        <span class="badge bg-info">Entretien programmé</span>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+            <div class="card-footer">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('download_file', filename=application.cv_file) }}" class="btn btn-primary" target="_blank">Télécharger le CV</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if application.status == 'pending' %}
+                    <a href="{{ url_for('admin_accept_application', application_id=application.id) }}" class="btn btn-success">
+                        <i class="bi bi-check-circle me-1"></i> Accepter la candidature
+                    </a>
+                    <a href="{{ url_for('admin_reject_application', application_id=application.id) }}" class="btn btn-danger">
+                        <i class="bi bi-x-circle me-1"></i> Rejeter la candidature
+                    </a>
+                    <a href="{{ url_for('admin_schedule_interview', application_id=application.id) }}" class="btn btn-info">
+                        <i class="bi bi-calendar-plus me-1"></i> Programmer un entretien
+                    </a>
+                    {% elif application.status == 'accepted' %}
+                    <a href="{{ url_for('admin_schedule_interview', application_id=application.id) }}" class="btn btn-info">
+                        <i class="bi bi-calendar-plus me-1"></i> Programmer un entretien
+                    </a>
+                    <button class="btn btn-outline-secondary" disabled>Candidature déjà acceptée</button>
+                    {% elif application.status == 'interview' %}
+                    <button class="btn btn-outline-info" disabled>Entretien déjà programmé</button>
+                    {% else %}
+                    <button class="btn btn-outline-secondary" disabled>Candidature déjà traitée</button>
+                    {% endif %}
+                    
+                    <!-- Bouton de suppression -->
+                    <a href="{{ url_for('admin_application_detail', application_id=application.id) }}?action=delete" class="btn btn-danger mb-2">
+                        <i class="bi bi-trash me-1"></i> Supprimer cette candidature
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        {% if application.status == 'interview' and application.interview_date %}
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Informations d'entretien</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Date:</strong> {{ application.interview_date }}</li>
+                    {% if application.interview_type %}
+                    <li class="list-group-item">
+                        <strong>Type:</strong> 
+                        {% if application.interview_type == 'video' %}
+                            Entretien vidéo
+                        {% elif application.interview_type == 'phone' %}
+                            Entretien téléphonique
+                        {% elif application.interview_type == 'inperson' %}
+                            Entretien en personne
+                        {% else %}
+                            {{ application.interview_type }}
+                        {% endif %}
+                    </li>
+                    {% endif %}
+                    {% if application.interview_location %}
+                    <li class="list-group-item"><strong>Lieu / Lien:</strong> 
+                        {% if application.interview_type == 'video' and application.interview_location.startswith('http') %}
+                        <a href="{{ application.interview_location }}" target="_blank">{{ application.interview_location }}</a>
+                        {% else %}
+                        {{ application.interview_location }}
+                        {% endif %}
+                    </li>
+                    {% endif %}
+                    {% if application.interview_link %}
+                    <li class="list-group-item"><strong>Lien Meet:</strong> 
+                        <a href="{{ application.interview_link }}" target="_blank">{{ application.interview_link }}</a>
+                    </li>
+                    {% endif %}
+                    {% if application.interview_scheduled_at %}
+                    <li class="list-group-item"><strong>Programmé le:</strong> {{ application.interview_scheduled_at }}</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-md-8">
+        {% if cv_info %}
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">CV Analysé</h5>
+                <span class="badge bg-primary">Analyse automatique</span>
+            </div>
+            <div class="card-body">
+                <h5>Résumé</h5>
+                <div class="p-3 bg-light rounded mb-4">
+                    {{ cv_info.summary }}
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5>Informations personnelles</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item"><strong>Nom:</strong> {{ cv_info.personal_info.name or 'Non spécifié' }}</li>
+                            <li class="list-group-item"><strong>Email:</strong> {{ cv_info.personal_info.email or 'Non spécifié' }}</li>
+                            <li class="list-group-item"><strong>Téléphone:</strong> {{ cv_info.personal_info.phone or 'Non spécifié' }}</li>
+                            {% if cv_info.personal_info.linkedin %}
+                            <li class="list-group-item"><strong>LinkedIn:</strong> <a href="{{ cv_info.personal_info.linkedin }}" target="_blank">{{ cv_info.personal_info.linkedin }}</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Compétences techniques</h5>
+                        <div class="mb-2">
+                            {% if cv_info.skills.technical_skills %}
+                                {% for skill in cv_info.skills.technical_skills %}
+                                <span class="badge bg-secondary me-1 mb-1">{{ skill }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <p>Aucune compétence technique détectée</p>
+                            {% endif %}
+                        </div>
+                        
+                        <h5 class="mt-3">Langues</h5>
+                        <div>
+                            {% if cv_info.skills.languages %}
+                                {% for language in cv_info.skills.languages %}
+                                <span class="badge bg-info me-1 mb-1">{{ language }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <p>Aucune langue détectée</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <h5>Expérience professionnelle</h5>
+                        {% if cv_info.experience %}
+                            <div class="list-group">
+                            {% for exp in cv_info.experience %}
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1">{{ exp.title }} - {{ exp.company }}</h5>
+                                        <small>{{ exp.period }}</small>
+                                    </div>
+                                    {% if exp.location %}
+                                    <p class="mb-1"><strong>Lieu:</strong> {{ exp.location }}</p>
+                                    {% endif %}
+                                    {% if exp.responsibilities and exp.responsibilities|length > 0 %}
+                                    <p class="mb-1"><strong>Responsabilités:</strong></p>
+                                    <ul>
+                                        {% for resp in exp.responsibilities[:3] %}
+                                        <li>{{ resp }}</li>
+                                        {% endfor %}
+                                        {% if exp.responsibilities|length > 3 %}
+                                        <li><em>... et {{ exp.responsibilities|length - 3 }} de plus</em></li>
+                                        {% endif %}
+                                    </ul>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                            </div>
+                        {% else %}
+                            <p>Aucune expérience professionnelle détectée</p>
+                        {% endif %}
+                        
+                        <h5 class="mt-4">Formation</h5>
+                        {% if cv_info.education %}
+                            <div class="list-group">
+                            {% for edu in cv_info.education %}
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1">{{ edu.degree }}</h5>
+                                        <small>{{ edu.period }}</small>
+                                    </div>
+                                    <p class="mb-1">{{ edu.institution }}{% if edu.location %}, {{ edu.location }}{% endif %}</p>
+                                    <p class="mb-1">{{ edu.field }}{% if edu.grade %} - {{ edu.grade }}{% endif %}</p>
+                                </div>
+                            {% endfor %}
+                            </div>
+                        {% else %}
+                            <p>Aucune formation détectée</p>
+                        {% endif %}
+                        
+                        <!-- Nouvelle section pour les certificats -->
+                        <h5 class="mt-4">Certifications</h5>
+                        {% if cv_info.certifications %}
+                            <div class="list-group">
+                            {% for cert in cv_info.certifications %}
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1">{{ cert.name }}</h5>
+                                        <small>{% if cert.date %}{{ cert.date }}{% else %}Date non spécifiée{% endif %}</small>
+                                    </div>
+                                    <p class="mb-1"><strong>Organisation:</strong> {{ cert.issuer }}</p>
+                                    {% if cert.field %}
+                                    <p class="mb-1"><strong>Domaine:</strong> {{ cert.field }}</p>
+                                    {% endif %}
+                                    {% if cert.id %}
+                                    <p class="mb-1"><strong>ID de certification:</strong> {{ cert.id }}</p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                            </div>
+                        {% else %}
+                            <p>Aucune certification détectée</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if match_result %}
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Résultats de Matching</h5>
+                <span class="badge bg-primary">Analyse automatique</span>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="mb-0">Scores de correspondance</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label d-flex justify-content-between">
+                                        <span>Score global</span>
+                                        <span>{{ match_result.overall_match }}%</span>
+                                    </label>
+                                    <div class="progress">
+                                        <div class="progress-bar 
+                                            {% if match_result.overall_match >= 70 %}
+                                                bg-success
+                                            {% elif match_result.overall_match >= 50 %}
+                                                bg-info
+                                            {% elif match_result.overall_match >= 30 %}
+                                                bg-warning
+                                            {% else %}
+                                                bg-danger
+                                            {% endif %}" 
+                                            role="progressbar" 
+                                            style="width: {{ match_result.overall_match }}%" 
+                                            aria-valuenow="{{ match_result.overall_match }}" 
+                                            aria-valuemin="0" 
+                                            aria-valuemax="100">
+                                            {{ match_result.overall_match }}%
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-2">
+                                    <label class="form-label d-flex justify-content-between">
+                                        <span>Compétences techniques</span>
+                                        <span>{{ match_result.technical_skills_match }}%</span>
+                                    </label>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ match_result.technical_skills_match }}%" aria-valuenow="{{ match_result.technical_skills_match }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-2">
+                                    <label class="form-label d-flex justify-content-between">
+                                        <span>Formation</span>
+                                        <span>{{ match_result.education_match }}%</span>
+                                    </label>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-info" role="progressbar" style="width: {{ match_result.education_match }}%" aria-valuenow="{{ match_result.education_match }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-2">
+                                    <label class="form-label d-flex justify-content-between">
+                                        <span>Expérience</span>
+                                        <span>{{ match_result.experience_match }}%</span>
+                                    </label>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-warning" role="progressbar" style="width: {{ match_result.experience_match }}%" aria-valuenow="{{ match_result.experience_match }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-2">
+                                    <label class="form-label d-flex justify-content-between">
+                                        <span>Langues</span>
+                                        <span>{{ match_result.languages_match }}%</span>
+                                    </label>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ match_result.languages_match }}%" aria-valuenow="{{ match_result.languages_match }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+
+                                {% if match_result.certifications_match %}
+                                <div class="mb-2">
+                                    <label class="form-label d-flex justify-content-between">
+                                        <span>Certifications</span>
+                                        <span>{{ match_result.certifications_match }}%</span>
+                                    </label>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ match_result.certifications_match }}%" aria-valuenow="{{ match_result.certifications_match }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="mb-0">Analyse détaillée</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <h6>Points forts</h6>
+                                    {% if match_result.strengths %}
+                                        <ul>
+                                        {% for strength in match_result.strengths %}
+                                            <li>{{ strength }}</li>
+                                        {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <p>Aucun point fort spécifique identifié.</p>
+                                    {% endif %}
+                                </div>
+                                <div class="mb-3">
+                                    <h6>Compétences manquantes</h6>
+                                    {% if match_result.missing_skills %}
+                                        <ul>
+                                        {% for skill in match_result.missing_skills %}
+                                            <li>{{ skill }}</li>
+                                        {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <p>Aucune compétence clé manquante.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Évaluation finale</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="p-3 bg-light rounded">
+                            {{ match_result.final_assessment }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="alert alert-warning">
+            <h5>CV en cours d'analyse</h5>
+            <p>Le CV est en cours d'analyse ou n'a pas pu être analysé. Veuillez rafraîchir la page dans quelques instants.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Retour au Dashboard</a>
+</div>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialise les tooltips Bootstrap
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+});
+</script>
+{% endblock %}
+
+{% endblock %}

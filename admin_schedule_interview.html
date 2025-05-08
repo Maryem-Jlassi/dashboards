@@ -1,0 +1,224 @@
+{% extends "layout.html" %}
+
+{% block title %}Programmer un entretien - {{ application.name }} - Système de Recrutement{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('admin_application_detail', application_id=application.id) }}">Candidature de {{ application.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Programmer un entretien</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Informations du candidat</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Nom</span>
+                        <span class="fw-bold">{{ application.name }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Email</span>
+                        <span class="fw-bold">{{ application.email }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Poste</span>
+                        <span class="fw-bold">{{ application.job_title }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Statut actuel</span>
+                        {% if application.status == 'pending' %}
+                        <span class="badge bg-warning">En attente</span>
+                        {% elif application.status == 'accepted' %}
+                        <span class="badge bg-success">Acceptée</span>
+                        {% elif application.status == 'rejected' %}
+                        <span class="badge bg-danger">Rejetée</span>
+                        {% elif application.status == 'interview' %}
+                        <span class="badge bg-info">Entretien programmé</span>
+                        {% endif %}
+                    </li>
+                    {% if application.score %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Score</span>
+                        <span class="fw-bold badge 
+                            {% if application.score >= 70 %}bg-success
+                            {% elif application.score >= 50 %}bg-info
+                            {% elif application.score >= 30 %}bg-warning
+                            {% else %}bg-danger{% endif %}">
+                            {{ application.score }}%
+                        </span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Programmer un entretien</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Un email d'invitation à l'entretien sera envoyé à <strong>{{ application.email }}</strong>.
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="interview_date" class="form-label">Date et heure de l'entretien *</label>
+                        <input type="datetime-local" class="form-control" id="interview_date" name="interview_date" required>
+                        <div class="form-text">Spécifiez la date et l'heure de l'entretien (format: YYYY-MM-DD HH:MM).</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="interview_type" class="form-label">Type d'entretien *</label>
+                        <select class="form-select" id="interview_type" name="interview_type" required>
+                            <option value="video">Entretien vidéo</option>
+                            <option value="phone">Entretien téléphonique</option>
+                            <option value="inperson">Entretien en personne</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="interview_location" class="form-label">Lieu / Lien de l'entretien *</label>
+                        <input type="text" class="form-control" id="interview_location" name="interview_location" required>
+                        <div class="form-text">Pour un entretien vidéo, indiquez le lien de la réunion. Pour un entretien en personne, indiquez l'adresse.</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="use_template" checked>
+                            <label class="form-check-label" for="use_template">Utiliser le modèle d'email par défaut</label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="message" class="form-label">Contenu de l'email</label>
+                        <textarea class="form-control" id="message" name="message" rows="12"></textarea>
+                        <div class="form-text">
+                            Laissez vide pour utiliser le modèle par défaut. Vous pouvez personnaliser le message d'invitation à l'entretien.
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Envoyer l'invitation</button>
+                        <a href="{{ url_for('admin_application_detail', application_id=application.id) }}" class="btn btn-outline-secondary">Annuler</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Définir la date et l'heure actuelles + 3 jours comme valeur par défaut
+    const now = new Date();
+    now.setDate(now.getDate() + 3);
+    now.setHours(10, 0, 0, 0); // 10:00 AM
+    
+    // Formater la date pour l'input datetime-local (YYYY-MM-DDThh:mm)
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    const defaultDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+    document.getElementById('interview_date').value = defaultDateTime;
+    
+    // Générer un texte d'email en fonction du type d'entretien
+    const useTemplateCheckbox = document.getElementById('use_template');
+    const messageTextarea = document.getElementById('message');
+    const interviewTypeSelect = document.getElementById('interview_type');
+    const interviewLocationInput = document.getElementById('interview_location');
+    const interviewDateInput = document.getElementById('interview_date');
+    
+    function generateTemplate() {
+        if (!useTemplateCheckbox.checked) {
+            return;
+        }
+        
+        const candidateName = "{{ application.name }}";
+        const jobTitle = "{{ application.job_title }}";
+        const interviewType = interviewTypeSelect.value;
+        const interviewLocation = interviewLocationInput.value;
+        const interviewDateObj = new Date(interviewDateInput.value);
+        
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        const formattedDate = interviewDateObj.toLocaleDateString('fr-FR', options);
+        
+        let typeText = '';
+        if (interviewType === 'video') {
+            typeText = `en visioconférence via le lien suivant : ${interviewLocation}`;
+        } else if (interviewType === 'phone') {
+            typeText = `par téléphone. Nous vous appellerons au numéro que vous nous avez communiqué`;
+        } else {
+            typeText = `en personne à l'adresse suivante : ${interviewLocation}`;
+        }
+        
+        const template = `Objet: Invitation à un entretien pour ${jobTitle}
+
+Bonjour ${candidateName},
+
+Suite à l'examen de votre candidature pour le poste de ${jobTitle}, nous avons le plaisir de vous inviter à un entretien qui se tiendra le ${formattedDate}.
+
+Cet entretien se déroulera ${typeText}.
+
+L'entretien durera environ 45 minutes et se déroulera comme suit :
+- Présentation de l'entreprise et du poste (10 minutes)
+- Discussion sur votre parcours et vos compétences (20 minutes)
+- Questions-réponses (15 minutes)
+
+Veuillez confirmer votre disponibilité pour cet entretien en répondant à cet e-mail.
+
+Si cette date ne vous convient pas, n'hésitez pas à nous proposer d'autres créneaux et nous ferons notre possible pour nous adapter.
+
+Nous vous recommandons de :
+- Relire la description du poste avant l'entretien
+- Préparer des questions sur le poste ou l'entreprise
+- Vous assurer que votre équipement est fonctionnel (pour un entretien à distance)
+
+Nous nous réjouissons de vous rencontrer et d'en apprendre davantage sur votre profil.
+
+Cordialement,
+L'équipe de recrutement`;
+        
+        messageTextarea.value = template;
+    }
+    
+    // Définir une valeur par défaut pour le type d'entretien (vidéo)
+    interviewTypeSelect.value = 'video';
+    // Définir une valeur par défaut pour le lien de l'entretien
+    interviewLocationInput.value = 'https://meet.google.com/abc-defg-hij';
+    
+    // Générer le template par défaut au chargement
+    generateTemplate();
+    
+    // Mettre à jour le template lorsque les champs changent
+    useTemplateCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            generateTemplate();
+        } else {
+            messageTextarea.value = '';
+        }
+    });
+    
+    interviewTypeSelect.addEventListener('change', generateTemplate);
+    interviewLocationInput.addEventListener('input', generateTemplate);
+    interviewDateInput.addEventListener('change', generateTemplate);
+});
+</script>
+{% endblock %}
+{% endblock %}

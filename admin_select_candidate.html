@@ -1,0 +1,90 @@
+{% extends "layout.html" %}
+
+{% block title %}Sélectionner un candidat pour un entretien - Système de Recrutement{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Sélectionner un candidat pour un entretien</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h4 class="mb-0">Sélectionner un candidat pour programmer un entretien</h4>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Email</th>
+                        <th>Offre d'emploi</th>
+                        <th>Catégorie</th>
+                        <th>Score</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if applications %}
+                        {% for application in applications %}
+                        <tr>
+                            <td>{{ application.name }}</td>
+                            <td>{{ application.email }}</td>
+                            <td>{{ application.job_title }}</td>
+                            <td>{{ categories[application.category] }}</td>
+                            <td>
+                                {% if application.score > 0 %}
+                                <span class="badge 
+                                    {% if application.score >= 70 %}bg-success
+                                    {% elif application.score >= 50 %}bg-info
+                                    {% elif application.score >= 30 %}bg-warning
+                                    {% else %}bg-danger{% endif %}">
+                                    {{ application.score }}%
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary">Non évalué</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if application.status == 'pending' %}
+                                <span class="badge bg-warning">En attente</span>
+                                {% elif application.status == 'accepted' %}
+                                <span class="badge bg-success">Acceptée</span>
+                                {% elif application.status == 'rejected' %}
+                                <span class="badge bg-danger">Rejetée</span>
+                                {% elif application.status == 'interview' %}
+                                <span class="badge bg-info">Entretien programmé</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admin_schedule_interview', application_id=application.id) }}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-calendar-event me-1"></i> Programmer un entretien
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center">Aucune candidature disponible.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if not applications %}
+<div class="alert alert-info">
+    <h5><i class="bi bi-info-circle me-2"></i>Aucune candidature éligible</h5>
+    <p>Il n'y a actuellement aucune candidature en attente ou acceptée pour programmer un entretien.</p>
+</div>
+{% endif %}
+
+{% endblock %}

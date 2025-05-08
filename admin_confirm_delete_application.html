@@ -1,0 +1,61 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Confirmer la suppression{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <h2>Confirmer la suppression</h2>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> 
+                Attention ! Vous êtes sur le point de supprimer définitivement cette candidature.
+            </div>
+            
+            <h4>Informations sur la candidature :</h4>
+            <ul class="list-group mb-4">
+                <li class="list-group-item">
+                    <strong>Candidat :</strong> {{ application.name }}
+                </li>
+                <li class="list-group-item">
+                    <strong>Email :</strong> {{ application.email }}
+                </li>
+                <li class="list-group-item">
+                    <strong>Poste :</strong> {{ application.job_title }}
+                </li>
+                <li class="list-group-item">
+                    <strong>Date de candidature :</strong> {{ application.created_at }}
+                </li>
+                <li class="list-group-item">
+                    <strong>Statut actuel :</strong> 
+                    {% if application.status == 'pending' %}
+                        <span class="badge bg-secondary">En attente</span>
+                    {% elif application.status == 'accepted' %}
+                        <span class="badge bg-success">Acceptée</span>
+                    {% elif application.status == 'rejected' %}
+                        <span class="badge bg-danger">Rejetée</span>
+                    {% elif application.status == 'interview' %}
+                        <span class="badge bg-primary">Entretien programmé</span>
+                    {% else %}
+                        <span class="badge bg-secondary">{{ application.status }}</span>
+                    {% endif %}
+                </li>
+            </ul>
+            
+            <p class="text-danger"><strong>Cette action ne peut pas être annulée.</strong></p>
+            <p>Le CV du candidat sera également supprimé du serveur.</p>
+            
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{{ url_for('admin_application_detail', application_id=application.id) }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Annuler
+                </a>
+                <a href="{{ url_for('admin_application_detail', application_id=application.id, action='delete', confirm='yes') }}" class="btn btn-danger">
+                    <i class="fas fa-trash-alt"></i> Confirmer la suppression
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
